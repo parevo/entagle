@@ -164,7 +164,7 @@ function App() {
 
           {/* Footer */}
           <footer className="mt-12 text-center text-xs text-muted-foreground">
-            <p>© 2024 Parevo.co — Secure & Low-Latency</p>
+            <p>© 2026 Parevo.co — Secure & Low-Latency</p>
           </footer>
         </div>
       )}

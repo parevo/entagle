@@ -1,0 +1,27 @@
+name: 🐛 Bug Report
+description: Report a bug or performance regression (e.g., latency spikes).
+labels: ["bug", "latency-regression"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🚨 Bug Description
+        What is happening? (e.g., Frame drops, Input lag, Crash)
+  - type: textarea
+    attributes:
+      label: 💻 Environment
+      description: OS version, Hardware (CPU/GPU), Networking conditions.
+      placeholder: |
+        OS: macOS Sonoma 14.5
+        CPU: M2 Max
+        Network: 5G / Fiber
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 🪵 Logs
+      description: Paste relevant logs from `tracing` (tracing-subscriber).
+  - type: textarea
+    attributes:
+      label: 📊 Performance Stats
+      description: If possible, provide RTT (ms) and FPS from the UI Status Indicator.

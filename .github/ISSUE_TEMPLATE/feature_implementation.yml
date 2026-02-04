@@ -1,0 +1,30 @@
+name: 🛠 Feature Request / Implementation
+description: Propose a new feature or track an architectural implementation.
+labels: ["enhancement", "implementation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🎯 Implementation Goal
+        Provide a detailed description of the component or feature to be implemented.
+  - type: checklist
+    attributes:
+      label: Technical Requirements
+      options:
+        - label: Follows Rust 2024 Edition idioms.
+        - label: Low-latency priority (Hot Path optimization).
+        - label: Cross-platform compatibility (Mac/Win).
+        - label: Error handling via `thiserror` and `anyhow`.
+  - type: textarea
+    attributes:
+      label: 🧱 Component Impact
+      description: Which crates or apps are affected by this change?
+      placeholder: |
+        - crates/capture
+        - crates/net-transport
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 🧪 Performance Implications
+      description: How does this affect RTT or Frame Stability?
