@@ -1,0 +1,21 @@
+[package]
+name = "capture"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+shared-protocol = { path = "../shared-protocol" }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+bytes = { workspace = true }
+parking_lot = { workspace = true }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+screencapturekit = { workspace = true }
+core-graphics = { workspace = true }
+core-foundation = { workspace = true }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows = { workspace = true }

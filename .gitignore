@@ -1,0 +1,36 @@
+# Rust
+target/
+**/*.rs.bk
+
+# Node / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+.eslintcache
+
+# Tauri
+apps/desktop-client/src-tauri/target/
+apps/desktop-client/src-tauri/gen/
+apps/desktop-client/src-tauri/app-icon.png
+apps/desktop-client/src-tauri/app-icon.jpg
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment
+.env
+.env.*.local

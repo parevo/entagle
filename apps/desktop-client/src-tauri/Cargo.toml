@@ -1,0 +1,49 @@
+[package]
+name = "desktop-client"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[build-dependencies]
+tauri-build = { workspace = true, features = [] }
+
+[dependencies]
+# Internal crates
+shared-protocol = { path = "../../../crates/shared-protocol" }
+crypto-session = { path = "../../../crates/crypto-session" }
+net-transport = { path = "../../../crates/net-transport" }
+capture = { path = "../../../crates/capture" }
+encoder = { path = "../../../crates/encoder" }
+input-injector = { path = "../../../crates/input-injector" }
+
+# Tauri
+tauri = { workspace = true, features = ["tray-icon"] }
+tauri-plugin-shell = "2"
+
+# Async runtime
+tokio = { workspace = true }
+futures = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+bincode = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# Utilities
+uuid = { workspace = true }
+bytes = { workspace = true }
+parking_lot = { workspace = true }
+crossbeam-channel = { workspace = true }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

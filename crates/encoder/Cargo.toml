@@ -1,0 +1,15 @@
+[package]
+name = "encoder"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+shared-protocol = { path = "../shared-protocol" }
+capture = { path = "../capture" }
+openh264 = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+bytes = { workspace = true }
+parking_lot = { workspace = true }
