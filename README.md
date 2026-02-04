@@ -2,7 +2,7 @@
 
 **High-Performance, Low-Latency Remote Desktop Protocol.**
 
-Built with Rust (2024 Edition), Tauri v2, and QUIC. Designed for engineers and power users who need AnyDesk/TeamViewer performance with an open-source, secure-by-default architecture.
+Built with Rust (2026 Edition), Tauri v2, and QUIC. Designed for engineers and power users who need AnyDesk/TeamViewer performance with an open-source, secure-by-default architecture.
 
 ![Entangle Vision](https://via.placeholder.com/1200x600?text=Entangle+Remote+Desktop+Cyberpunk+Interface)
 
@@ -27,7 +27,7 @@ A Rust workspace with strict separation of concerns:
 
 ## 🛠 Tech Stack
 
-- **Core:** Rust 1.83+ (2024 Edition)
+- **Core:** Rust 1.83+ (2026 Edition)
 - **Networking:** QUIC (`quinn`), WebSockets (`axum`)
 - **Desktop:** Tauri v2
 - **Frontend:** React + Vite + TypeScript
