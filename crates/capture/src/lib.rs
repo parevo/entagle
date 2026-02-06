@@ -19,6 +19,26 @@ pub use frame::*;
 pub use traits::*;
 
 #[cfg(target_os = "macos")]
+pub fn has_screen_recording_permission() -> bool {
+    core_graphics::access::ScreenCaptureAccess::default().preflight()
+}
+
+#[cfg(target_os = "macos")]
+pub fn request_screen_recording_permission() -> bool {
+    core_graphics::access::ScreenCaptureAccess::default().request()
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn has_screen_recording_permission() -> bool {
+    true
+}
+
+#[cfg(not(target_os = "macos"))]
+pub fn request_screen_recording_permission() -> bool {
+    true
+}
+
+#[cfg(target_os = "macos")]
 pub use macos::MacOSCapture;
 
 #[cfg(target_os = "windows")]

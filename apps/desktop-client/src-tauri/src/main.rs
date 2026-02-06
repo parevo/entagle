@@ -6,11 +6,12 @@
 
 mod commands;
 mod session;
+mod signaling;
 mod state;
 
 use std::sync::Arc;
 use tauri::Manager;
-use tracing::{info, Level};
+use tracing::{Level, info};
 use tracing_subscriber::FmtSubscriber;
 
 use state::AppState;
@@ -38,12 +39,17 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::get_peer_id,
+            commands::get_permissions,
+            commands::request_permissions,
+            commands::open_permission_settings,
             commands::start_session,
             commands::stop_session,
             commands::get_session_status,
             commands::send_input,
             commands::request_keyframe,
             commands::set_quality,
+            commands::accept_connection,
+            commands::reject_connection,
         ])
         .run(tauri::generate_context!())
         .expect("Error running Entangle");

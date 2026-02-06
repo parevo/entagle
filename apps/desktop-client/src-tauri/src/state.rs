@@ -12,7 +12,7 @@ pub struct AppState {
     /// Our peer ID
     pub peer_id: PeerId,
     /// Active sessions (we could have multiple in the future)
-    pub sessions: RwLock<HashMap<PeerId, Session>>,
+    pub sessions: RwLock<HashMap<PeerId, std::sync::Arc<Session>>>,
     /// Tokio runtime for async operations
     pub runtime: Runtime,
     /// Signaling server URL
@@ -37,12 +37,12 @@ impl AppState {
     }
 
     /// Add a session
-    pub fn add_session(&self, remote_peer_id: PeerId, session: Session) {
+    pub fn add_session(&self, remote_peer_id: PeerId, session: std::sync::Arc<Session>) {
         self.sessions.write().insert(remote_peer_id, session);
     }
 
     /// Remove a session
-    pub fn remove_session(&self, remote_peer_id: &PeerId) -> Option<Session> {
+    pub fn remove_session(&self, remote_peer_id: &PeerId) -> Option<std::sync::Arc<Session>> {
         self.sessions.write().remove(remote_peer_id)
     }
 

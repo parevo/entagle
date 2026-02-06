@@ -33,6 +33,7 @@ quinn = "0.11"
 rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
 rcgen = "0.13"
 webrtc-util = "0.9"
+tokio-tungstenite = "0.26"
 
 # Cryptography
 x25519-dalek = { version = "2.0", features = ["static_secrets"] }
@@ -68,6 +69,7 @@ dashmap = "6.1"
 
 # Platform Specific (declared here, pulled by crates for specific targets)
 screencapturekit = "0.2"
+screencapturekit-sys = "0.2"
 core-graphics = "0.24"
 core-foundation = "0.10"
 windows = { version = "0.58", features = [

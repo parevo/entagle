@@ -2,8 +2,8 @@
 
 use bytes::Bytes;
 use capture::{CapturedFrame, PixelFormat};
-use openh264::encoder::{Encoder, EncoderConfig as OpenH264Config};
 use openh264::Error as OpenH264Error;
+use openh264::encoder::{Encoder, EncoderConfig as OpenH264Config};
 use std::time::Instant;
 use tracing::{debug, info};
 
@@ -112,15 +112,11 @@ impl VideoEncoder for OpenH264Encoder {
             config.width, config.height, config.bitrate_kbps, config.fps
         );
 
-        let mut openh264_config = OpenH264Config::new();
-        openh264_config
+        let mut openh264_config = OpenH264Config::new()
             .set_bitrate_bps(config.bitrate_kbps * 1000)
-            .max_frame_rate(config.fps as f32);
-
-        // Enable low-latency mode
-        if config.low_latency {
-            openh264_config.enable_skip_frame(false);
-        }
+            .max_frame_rate(config.fps as f32)
+            .usage_type(openh264::encoder::UsageType::ScreenContentRealTime)
+            .enable_skip_frame(false);
 
         let encoder =
             Encoder::with_api_config(openh264::OpenH264API::from_source(), openh264_config)
@@ -171,16 +167,39 @@ impl VideoEncoder for OpenH264Encoder {
             debug!("Forcing keyframe");
         }
 
+        if is_keyframe {
+            encoder.force_intra_frame();
+        }
+
         // For actual encoding, we'd use encoder.encode() here
-        // This is simplified for the structure
         let bitstream_result = encoder
             .encode(&yuv_source)
             .map_err(|e| EncoderError::EncodingFailed(e.to_string()))?;
 
         let encode_time = start.elapsed().as_micros() as u64;
 
-        // Collect NAL units
-        let nal_data = bitstream_result.to_vec();
+        // Collect NAL units with Annex-B start codes
+        let mut nal_data = Vec::new();
+        for l in 0..bitstream_result.num_layers() {
+            if let Some(layer) = bitstream_result.layer(l) {
+                for n in 0..layer.nal_count() {
+                    if let Some(nal) = layer.nal_unit(n) {
+                        let has_start_code = nal.starts_with(&[0, 0, 0, 1])
+                            || nal.starts_with(&[0, 0, 1]);
+                        if !has_start_code {
+                            nal_data.extend_from_slice(&[0, 0, 0, 1]);
+                        }
+                        nal_data.extend_from_slice(nal);
+                    }
+                }
+            }
+        }
+
+        if nal_data.is_empty() {
+            return Err(EncoderError::EncodingFailed(
+                "Empty bitstream from encoder".to_string(),
+            ));
+        }
 
         let frame_type = if is_keyframe {
             EncodedFrameType::Key
@@ -192,6 +211,8 @@ impl VideoEncoder for OpenH264Encoder {
 
         let encoded = EncodedFrame {
             data: Bytes::from(nal_data),
+            width: frame.width,
+            height: frame.height,
             frame_type,
             pts_us,
             dts_us: pts_us,

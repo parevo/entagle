@@ -22,6 +22,9 @@ pub enum InjectorError {
     #[error("Platform not supported")]
     UnsupportedPlatform,
 
+    #[error("Platform error: {0}")]
+    Platform(String),
+
     #[error("Internal error: {0}")]
     Internal(String),
 }

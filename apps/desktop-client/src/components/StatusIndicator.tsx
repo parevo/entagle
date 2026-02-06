@@ -41,21 +41,21 @@ export function StatusIndicator({ state, rttMs }: StatusIndicatorProps) {
           className={cn(
             "w-3 h-3 rounded-full",
             state === "connected"
-              ? "bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]"
+              ? "bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.7)]"
               : state === "connecting"
-                ? "bg-yellow-500 animate-pulse"
+                ? "bg-amber-400 animate-pulse"
                 : state === "error"
-                  ? "bg-red-500"
+                  ? "bg-rose-400"
                   : "bg-muted-foreground/30",
           )}
         />
         {state === "connected" && (
-          <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-25" />
+          <div className="absolute inset-0 bg-emerald-400 rounded-full animate-ping opacity-25" />
         )}
       </div>
       <Badge
         variant={getStatusColor()}
-        className="font-mono px-3 py-1 uppercase tracking-tight"
+        className="font-mono px-3 py-1 uppercase tracking-tight border border-white/10 bg-white/5"
       >
         <div className="flex items-center gap-1.5">
           {state === "connected" ? (

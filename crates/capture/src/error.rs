@@ -37,6 +37,12 @@ pub enum CaptureError {
     #[error("Timeout waiting for frame")]
     Timeout,
 
+    #[error("Platform error: {0}")]
+    Platform(String),
+
+    #[error("Processing error: {0}")]
+    Processing(String),
+
     #[error("Internal error: {0}")]
     Internal(String),
 }

@@ -11,9 +11,11 @@ thiserror = { workspace = true }
 tracing = { workspace = true }
 bytes = { workspace = true }
 parking_lot = { workspace = true }
+futures.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
 screencapturekit = { workspace = true }
+screencapturekit-sys = { workspace = true }
 core-graphics = { workspace = true }
 core-foundation = { workspace = true }
 

@@ -12,21 +12,23 @@ impl PeerId {
         Self(Uuid::new_v4())
     }
 
-    /// Format as user-friendly display string (e.g., "ABC-123-XYZ")
+    /// Format as user-friendly display string (UUID)
     pub fn to_display_string(&self) -> String {
-        let hex = self.0.simple().to_string().to_uppercase();
-        format!("{}-{}-{}", &hex[0..3], &hex[3..6], &hex[6..9])
+        self.0.to_string().to_uppercase()
     }
 
     /// Parse from display string
     pub fn from_display_string(s: &str) -> Option<Self> {
-        let cleaned: String = s.chars().filter(|c| c.is_alphanumeric()).collect();
-        if cleaned.len() < 9 {
+        let trimmed = s.trim();
+        if let Ok(uuid) = Uuid::parse_str(trimmed) {
+            return Some(Self(uuid));
+        }
+
+        let cleaned: String = trimmed.chars().filter(|c| c.is_alphanumeric()).collect();
+        if cleaned.len() != 32 {
             return None;
         }
-        // Pad with zeros to make a valid UUID
-        let padded = format!("{:0<32}", cleaned.to_lowercase());
-        Uuid::parse_str(&padded).ok().map(Self)
+        Uuid::parse_str(&cleaned.to_lowercase()).ok().map(Self)
     }
 }
 

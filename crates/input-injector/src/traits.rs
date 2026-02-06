@@ -108,8 +108,16 @@ impl InputProcessor {
                 x,
                 y,
             } => {
+                let (abs_x, abs_y) = if (0.0..=1.0).contains(x) && (0.0..=1.0).contains(y) {
+                    (
+                        *x * self.screen_width as f64,
+                        *y * self.screen_height as f64,
+                    )
+                } else {
+                    (*x, *y)
+                };
                 // Move to position first
-                self.injector.move_mouse(*x, *y)?;
+                self.injector.move_mouse(abs_x, abs_y)?;
 
                 match state {
                     shared_protocol::KeyState::Pressed => self.injector.mouse_down(*button),

@@ -90,6 +90,10 @@ pub enum EncodedFrameType {
 pub struct EncodedFrame {
     /// NAL units data
     pub data: Bytes,
+    /// Frame width
+    pub width: u32,
+    /// Frame height
+    pub height: u32,
     /// Frame type
     pub frame_type: EncodedFrameType,
     /// Presentation timestamp in microseconds

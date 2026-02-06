@@ -16,6 +16,8 @@ interface ConnectionCardProps {
   onRemotePeerIdChange: (id: string) => void;
   onConnect: () => void;
   isConnecting: boolean;
+  lastRemotePeerId: string | null;
+  onReconnect: () => void;
 }
 
 export function ConnectionCard({
@@ -24,6 +26,8 @@ export function ConnectionCard({
   onRemotePeerIdChange,
   onConnect,
   isConnecting,
+  lastRemotePeerId,
+  onReconnect,
 }: ConnectionCardProps) {
   const [copied, setCopied] = useState(false);
 
@@ -33,15 +37,20 @@ export function ConnectionCard({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleConnectClick = () => {
+    console.log("Connect button clicked");
+    onConnect();
+  };
+
   return (
     <Card className="w-full max-w-md border-primary/20 shadow-primary/10">
-      <CardHeader>
+      <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2 text-primary">
           <Monitor className="w-5 h-5" />
           Remote Session
         </CardTitle>
         <CardDescription>
-          Share your ID to be controlled, or enter an ID to control.
+          Share your ID to grant access, or enter an ID to connect.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -77,7 +86,7 @@ export function ConnectionCard({
               Control Remote Desktop
             </label>
             <Input
-              placeholder="Enter Remote ID (e.g. ABC-123-XYZ)"
+              placeholder="Enter Partner ID"
               value={remotePeerId}
               onChange={(e) =>
                 onRemotePeerIdChange(e.target.value.toUpperCase())
@@ -85,11 +94,22 @@ export function ConnectionCard({
               className="font-mono text-lg py-6 border-white/10 focus:border-primary/50"
             />
           </div>
+          {lastRemotePeerId && (
+            <Button
+              className="w-full"
+              variant="outline"
+              onClick={onReconnect}
+              disabled={isConnecting}
+            >
+              Reconnect to {lastRemotePeerId}
+            </Button>
+          )}
           <Button
             className="w-full py-6 text-base font-bold shadow-neon"
             variant="neon"
-            disabled={!remotePeerId || isConnecting}
-            onClick={onConnect}
+            disabled={isConnecting || !remotePeerId}
+            onClick={handleConnectClick}
+            type="button"
           >
             {isConnecting ? (
               <div className="flex items-center gap-2">
@@ -99,7 +119,7 @@ export function ConnectionCard({
             ) : (
               <div className="flex items-center gap-2">
                 <Send className="w-4 h-4" />
-                Connect to Partner
+                Connect
               </div>
             )}
           </Button>

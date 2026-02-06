@@ -24,6 +24,7 @@ tauri-plugin-shell = "2"
 # Async runtime
 tokio = { workspace = true }
 futures = { workspace = true }
+tokio-tungstenite = { workspace = true, features = ["rustls-tls-native-roots"] }
 
 # Serialization
 serde = { workspace = true }
@@ -41,8 +42,10 @@ anyhow = { workspace = true }
 # Utilities
 uuid = { workspace = true }
 bytes = { workspace = true }
+url = "2.5"
 parking_lot = { workspace = true }
 crossbeam-channel = { workspace = true }
+local-ip-address = "0.6.10"
 
 [features]
 default = ["custom-protocol"]

@@ -12,7 +12,7 @@ use quinn::{
 use tokio::sync::mpsc;
 use tracing::{debug, info, warn};
 
-use crate::{CongestionController, TransportError, TransportResult, MAX_DATAGRAM_SIZE};
+use crate::{CongestionController, MAX_DATAGRAM_SIZE, TransportError, TransportResult};
 
 /// QUIC transport for Entangle
 pub struct QuicTransport {
@@ -20,14 +20,14 @@ pub struct QuicTransport {
     connection: RwLock<Option<Connection>>,
     congestion: Arc<CongestionController>,
     datagram_tx: mpsc::Sender<Bytes>,
-    datagram_rx: RwLock<Option<mpsc::Receiver<Bytes>>>,
+    datagram_rx: tokio::sync::Mutex<Option<mpsc::Receiver<Bytes>>>,
 }
 
 impl QuicTransport {
     /// Create a new QUIC transport (client mode)
     pub async fn new_client(bind_addr: SocketAddr) -> TransportResult<Self> {
         let client_config = Self::create_client_config()?;
-        
+
         let mut endpoint = Endpoint::client(bind_addr)?;
         endpoint.set_default_client_config(client_config);
 
@@ -38,14 +38,14 @@ impl QuicTransport {
             connection: RwLock::new(None),
             congestion: Arc::new(CongestionController::new(Default::default())),
             datagram_tx,
-            datagram_rx: RwLock::new(Some(datagram_rx)),
+            datagram_rx: tokio::sync::Mutex::new(Some(datagram_rx)),
         })
     }
 
     /// Create a new QUIC transport (server mode)  
     pub async fn new_server(bind_addr: SocketAddr) -> TransportResult<Self> {
         let (server_config, _cert) = Self::create_server_config()?;
-        
+
         let endpoint = Endpoint::server(server_config, bind_addr)?;
 
         let (datagram_tx, datagram_rx) = mpsc::channel(1000);
@@ -55,16 +55,17 @@ impl QuicTransport {
             connection: RwLock::new(None),
             congestion: Arc::new(CongestionController::new(Default::default())),
             datagram_tx,
-            datagram_rx: RwLock::new(Some(datagram_rx)),
+            datagram_rx: tokio::sync::Mutex::new(Some(datagram_rx)),
         })
     }
 
     /// Create client TLS config (insecure for development)
     fn create_client_config() -> TransportResult<ClientConfig> {
-        let crypto = rustls::ClientConfig::builder()
+        let mut crypto = rustls::ClientConfig::builder()
             .dangerous()
             .with_custom_certificate_verifier(Arc::new(SkipServerVerification))
             .with_no_client_auth();
+        crypto.alpn_protocols = vec![b"entangle".to_vec()];
 
         let mut transport = TransportConfig::default();
         transport.max_idle_timeout(Some(Duration::from_secs(30).try_into().unwrap()));
@@ -192,9 +193,7 @@ impl QuicTransport {
     /// Send a datagram (unreliable, fire-and-forget)
     pub fn send_datagram(&self, data: Bytes) -> TransportResult<()> {
         let conn = self.connection.read();
-        let connection = conn
-            .as_ref()
-            .ok_or(TransportError::NotConnected)?;
+        let connection = conn.as_ref().ok_or(TransportError::NotConnected)?;
 
         if data.len() > MAX_DATAGRAM_SIZE {
             return Err(TransportError::DatagramTooLarge {
@@ -212,10 +211,14 @@ impl QuicTransport {
 
     /// Receive a datagram
     pub async fn recv_datagram(&self) -> TransportResult<Bytes> {
-        let mut rx_guard = self.datagram_rx.write();
-        let rx = rx_guard
-            .as_mut()
-            .ok_or(TransportError::NotConnected)?;
+        let mut rx_guard = self.datagram_rx.lock().await;
+
+        // We need this check to ensure we have a receiver
+        if rx_guard.is_none() {
+            return Err(TransportError::NotConnected);
+        }
+
+        let rx = rx_guard.as_mut().unwrap();
 
         rx.recv()
             .await
@@ -225,9 +228,7 @@ impl QuicTransport {
     /// Open a new bidirectional stream (reliable)
     pub async fn open_bi_stream(&self) -> TransportResult<(SendStream, RecvStream)> {
         let conn = self.connection.read();
-        let connection = conn
-            .as_ref()
-            .ok_or(TransportError::NotConnected)?;
+        let connection = conn.as_ref().ok_or(TransportError::NotConnected)?;
 
         connection
             .open_bi()
@@ -238,9 +239,7 @@ impl QuicTransport {
     /// Open a new unidirectional stream (reliable)
     pub async fn open_uni_stream(&self) -> TransportResult<SendStream> {
         let conn = self.connection.read();
-        let connection = conn
-            .as_ref()
-            .ok_or(TransportError::NotConnected)?;
+        let connection = conn.as_ref().ok_or(TransportError::NotConnected)?;
 
         connection
             .open_uni()
@@ -251,10 +250,7 @@ impl QuicTransport {
     /// Accept an incoming bidirectional stream
     pub async fn accept_bi_stream(&self) -> TransportResult<(SendStream, RecvStream)> {
         let conn = self.connection.read();
-        let connection = conn
-            .as_ref()
-            .ok_or(TransportError::NotConnected)?
-            .clone();
+        let connection = conn.as_ref().ok_or(TransportError::NotConnected)?.clone();
         drop(conn);
 
         connection
@@ -271,6 +267,11 @@ impl QuicTransport {
     /// Check if connected
     pub fn is_connected(&self) -> bool {
         self.connection.read().is_some()
+    }
+
+    /// Get local address
+    pub fn local_addr(&self) -> Option<SocketAddr> {
+        self.endpoint.local_addr().ok()
     }
 
     /// Get remote address
